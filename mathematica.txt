@@ -1,0 +1,40 @@
+(*
+Complies with:
+
+http://cognomicon.blogspot.com/2015/05/mathematica-coding-standards.html
+
+Dyspoissometer for Mathematica
+
+You can just cut-and-paste the functions below directly into MathKernel (Linux command line) for Mathematica, or something equivalent under Windows.
+
+These functions abstractly mirror their counterparts of the same name (except for letter case and underscores) in dyspoissometer.c.
+
+Example MathKernel session:
+
+[Start MathKernel and paste the function definitions below into the text session. Then pase the following lines and observe the line-by-line output:]
+
+masklist={2,8,4,3,3,0,7,0,8,1,4,6,2,1,6,0,4,3,2,2,1,6}
+maskmax=Max[masklist]
+maskidxmax=Length[masklist]-1
+freqlist=DyspoissometerFreqListGet[masklist,maskmax]
+poplist=DyspoissometerPopListGet[freqlist]
+logfreedomdense=DyspoissometerLogfreedomDenseGet[maskmax, poplist]
+logfreedomsparse=DyspoissometerLogfreedomSparseGet[freqlist]                                                                                                                                          
+dyspoissonism=DyspoissometerDyspoissonismGet[maskidxmax,logfreedomdense,maskmax]
+
+Note that putting a ";" at the end of each line suppresses output. You should see that:
+
+logfreedomdense=logfreedomsparse=43.6555
+dyspoissonism=0.0968871
+*)
+DyspoissometerLogfreedomSparseGet[freqlist_]:=(maskspan0=Length[freqlist]; logfreedom0=0.+LogGamma[maskspan0+1]+LogGamma[Total[freqlist]+1]; freqlist0=Sort[freqlist]; pop0=0; freqold0=0; For[mask0=1, mask0<=maskspan0, mask0++, freq0=freqlist0[[mask0]]; If[freq0==freqold0, pop0++, logfreedom0-=pop0*LogGamma[freqold0+1]+LogGamma[pop0+1]; freqold0=freq0; pop0=1]]; logfreedom0-=pop0*LogGamma[freq0+1]+LogGamma[pop0+1]; Return[logfreedom0])
+
+DyspoissometerLogfreedomDenseGet[maskmax_, poplist_]:=(freqmax1=Length[poplist]; logfreedom1=0.+LogGamma[maskmax+2]; maskcount1=0; For[freq1=1, freq1<=freqmax1, freq1++, pop1=poplist[[freq1]]; If[pop1!=0, logfreedom1-=pop1*LogGamma[freq1+1]+LogGamma[pop1+1]; maskcount1+=freq1*pop1]]; logfreedom1+=LogGamma[maskcount1+1]; Return[logfreedom1]);
+
+DyspoissometerFreqListGet[masklist_, maskmax_]:=(maskspan2=maskmax+1; maskcount2=Length[masklist]; freqlist2=Array[0&, maskspan2]; For[maskidx2=0, maskidx2<maskcount2, maskidx2++, freqlist2[[masklist[[maskidx2+1]]+1]]++]; Return[freqlist2])
+
+DyspoissometerPopListGet[freqlist_]:=(maskcount3=Total[freqlist]; maskspan3=Length[freqlist]; freqmax3=Max[freqlist]; poplist3=Array[0&, freqmax3]; For[mask3=0, mask3<maskspan3, mask3++, freq3=freqlist[[mask3+1]]; If[freq3!=0, poplist3[[freq3]]++]]; Return[poplist3])
+
+DyspoissometerDyspoissonismGet[maskidxmax_, logfreedom_, maskmax_]:=(dyspoissonism4=1.-(logfreedom/((maskidxmax+1)*Log[maskmax+1])); Return[dyspoissonism4]);
+
+DyspoissometerUINTListLogfreedomGet[masklist_, maskmax_]:=(freqlist5=DyspoissometerFreqListGet[masklist, maskmax]; logfreedom5=DyspoissometerLogfreedomSparseGet[freqlist5]; Return[logfreedom5])
