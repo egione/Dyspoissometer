@@ -1101,7 +1101,7 @@ Adjust [freq_min, freq_max] to fit this new interval size.
 Set pop_idx_max to a power of 2, less one. It will never wrap because the highest possible frequency is DYSPOISSOMETER_UINT_MAX, so we would never be required to expand beyond that based on the while() conditions above.
 */
           pop_idx_max=(DYSPOISSOMETER_UINT)((DYSPOISSOMETER_UINT)(pop_idx_max<<1)+1);
-          if(((freq_min+pop_idx_count_half)<pop_idx_count_half)||(freq_max<pop_idx_count_half)){
+          if((freq_min_delta<pop_idx_count_half)||(freq_max<pop_idx_count_half)){
             freq_max=pop_idx_max;
             freq_min=0;
           }
