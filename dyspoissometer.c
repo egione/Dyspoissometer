@@ -1407,21 +1407,19 @@ The following code uses logfreedom_delta and logfreedom_delta_delta to compute t
 */
         freq_expression=LOG((DYSPOISSOMETER_NUMBER)(freq_down_right)/(DYSPOISSOMETER_UINT)(freq_up_left+1));
         logfreedom_delta=freq_expression-LOG((DYSPOISSOMETER_NUMBER)(pop_down_left+1));
+        pop_delta_max=MIN(pop_down_right, pop_up_left);
+        pop_delta_min=1;
 /*
 Handle each of the aforementioned 3 possible "up" and "down" interaction topologies, with the most likely first.
 */
         if(2<pop_idx_delta){
           logfreedom_delta+=LOG((DYSPOISSOMETER_NUMBER)(pop_down_right)*pop_up_left/(DYSPOISSOMETER_UINT)(pop_up_right+1));
         }else if(!pop_idx_delta){
+          pop_delta_max>>=1;
           logfreedom_delta+=LOG((DYSPOISSOMETER_NUMBER)(pop_down_right-1)*pop_down_right/(DYSPOISSOMETER_UINT)(pop_up_right+1));
         }else{
           logfreedom_delta-=LOG((DYSPOISSOMETER_NUMBER)(pop_down_left+2)/((DYSPOISSOMETER_NUMBER)(pop_down_right)*pop_up_left));
         }
-        pop_delta_max=MIN(pop_down_right, pop_up_left);
-        if(pop_idx_down==pop_idx_up){
-          pop_delta_max>>=1;
-        }
-        pop_delta_min=1;
 /*
 Set pop_delta_max_minus_1 to (pop_delta_max-1) because we can't evaluate logfreedom_delta_delta at pop_delta_max because it's a discrete first derivative, meaning that it's the difference of 2 neighboring sample points, so we need to bound our search accordingly.
 */
