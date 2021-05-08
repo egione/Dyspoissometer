@@ -1136,14 +1136,71 @@ logfreedom_delta=
 -logfreedom(pop_down_left, pop_down_right, pop_up_left, pop_up_right)
 
 logfreedom_delta=
--LOG_SUM(pop_down_left+pop_delta)-(pop_down_left+pop_delta)*LOG_SUM(freq_down_right-1)
--LOG_SUM(pop_down_right-pop_delta)-(pop_down_right-pop_delta)*LOG_SUM(freq_down_right)
--LOG_SUM(pop_up_left-pop_delta)-(pop_up_left-pop_delta)*LOG_SUM(freq_up_left)
--LOG_SUM(pop_up_right+pop_delta)-(pop_up_right+pop_delta)*LOG_SUM(freq_up_left+1)
-+LOG_SUM(pop_down_left)+pop_down_left*LOG_SUM(freq_down_right-1)
-+LOG_SUM(pop_down_right)+pop_down_right*LOG_SUM(freq_down_right)
-+LOG_SUM(pop_up_left)+pop_up_left*LOG_SUM(freq_up_left)
-+LOG_SUM(pop_up_right)+pop_up_right*LOG_SUM(freq_up_left+1)
++LOG_SUM(Q)
++LOG_SUM(Z)
+-LOG_SUM(pop_down_left+pop_delta)
+-LOG_SUM(pop_down_right-pop_delta)
+-LOG_SUM(pop_up_left-pop_delta)
+-LOG_SUM(pop_up_right+pop_delta)
+-(pop_down_left+pop_delta)*LOG_SUM(freq_down_left)
+-(pop_down_right-pop_delta)*LOG_SUM(freq_down_right)
+-(pop_up_left-pop_delta)*LOG_SUM(freq_up_left)
+-(pop_up_right+pop_delta)*LOG_SUM(freq_up_right)
+-LOG_SUM(Q)
+-LOG_SUM(Z)
++LOG_SUM(pop_down_left)
++LOG_SUM(pop_down_right)
++LOG_SUM(pop_up_left)
++LOG_SUM(pop_up_right)
++pop_down_left*LOG_SUM(freq_down_left)
++pop_down_right*LOG_SUM(freq_down_right)
++pop_up_left*LOG_SUM(freq_up_left)
++pop_up_right*LOG_SUM(freq_up_right)
+
+But (freq_down_left==(freq_down_right-1)) and (freq_up_right==(freq_up_left+1)). So:
+
+logfreedom_delta=
+-LOG_SUM(pop_down_left+pop_delta)
+-LOG_SUM(pop_down_right-pop_delta)
+-LOG_SUM(pop_up_left-pop_delta)
+-LOG_SUM(pop_up_right+pop_delta)
+-(pop_down_left+pop_delta)*LOG_SUM(freq_down_right-1)
+-(pop_down_right-pop_delta)*LOG_SUM(freq_down_right)
+-(pop_up_left-pop_delta)*LOG_SUM(freq_up_left)
+-(pop_up_right+pop_delta)*LOG_SUM(freq_up_left+1)
++LOG_SUM(pop_down_left)
++LOG_SUM(pop_down_right)
++LOG_SUM(pop_up_left)
++LOG_SUM(pop_up_right)
++pop_down_left*LOG_SUM(freq_down_right-1)
++pop_down_right*LOG_SUM(freq_down_right)
++pop_up_left*LOG_SUM(freq_up_left)
++pop_up_right*LOG_SUM(freq_up_left+1)
+
+logfreedom_delta=
++LOG_SUM(pop_down_left)
+-LOG_SUM(pop_down_left+pop_delta)
++LOG_SUM(pop_down_right)
+-LOG_SUM(pop_down_right-pop_delta)
++LOG_SUM(pop_up_left)
+-LOG_SUM(pop_up_left-pop_delta)
++LOG_SUM(pop_up_right)
+-LOG_SUM(pop_up_right+pop_delta)
+-(pop_down_left+pop_delta)*LOG_SUM(freq_down_right-1)
++pop_down_left*LOG_SUM(freq_down_right-1)
+-(pop_down_right-pop_delta)*LOG_SUM(freq_down_right)
++pop_down_right*LOG_SUM(freq_down_right)
+-(pop_up_left-pop_delta)*LOG_SUM(freq_up_left)
++pop_up_left*LOG_SUM(freq_up_left)
+-(pop_up_right+pop_delta)*LOG_SUM(freq_up_left+1)
++pop_up_right*LOG_SUM(freq_up_left+1)
+
+logfreedom_delta=
++pop_delta*(LOG_SUM(freq_down_right)-LOG_SUM(freq_down_right-1)+LOG_SUM(freq_up_left)-LOG_SUM(freq_up_left+1))
++LOG_SUM(pop_down_left)-LOG_SUM(pop_down_left+pop_delta)
++LOG_SUM(pop_down_right)-LOG_SUM(pop_down_right-pop_delta)
++LOG_SUM(pop_up_left)-LOG_SUM(pop_up_left-pop_delta)
++LOG_SUM(pop_up_right)-LOG_SUM(pop_up_right+pop_delta)
 
 logfreedom_delta=
 +pop_delta*(LOG(freq_down_right)-LOG(freq_up_left+1))
@@ -1154,11 +1211,11 @@ logfreedom_delta=
 
 Note that we exploited the fact that LOG_SUM() expressions can sometimes sum to LOG() expressions.
 
-If you look at the above expression, it's evident that the pop_delta terms come in just 2 types: (1) a negative LOG_SUM() which becomes increasingly negative at an accelerating rate and (2) another negative LOG_SUM() which becomes increasingly positive at a decelerating rate. The sum of such functions is an inverted "U". This is good news because it means that either: (1) we can binary search for the point at which the rate of change in logfreedom_delta (logfreedom_delta_delta) is as close to zero as possible or (2) the maximum logfreedom is found at (pop_delta==1). Note that logfreedom_delta is simply the logfreedom minus a constant -- _not_ the discrete derivative of logfreedom; however, logfreedom_delta_delta is indeed the discrete derivative of logfreedom_delta. Anyway, we now need to derive logfreedom_delta_delta:
+If you look at the above expression, it's evident that the pop_delta terms come in 3 types: (1) a negative LOG_SUM() which becomes increasingly negative at an accelerating rate as pop_delta grows, (2) a positive LOG_SUM() which becomes increasingly positive at a decelerating rate, and (3) a linear term of either sign which is proporational to pop_delta. The sum of such functions is an inverted "U". This is good news because it means that either: (1) we can binary search for the point at which the rate of change in logfreedom_delta (logfreedom_delta_delta) is as close to zero as possible or (2) the maximum logfreedom is found at the least value allowed under the above constraints (pop_delta==1). Note that logfreedom_delta is simply the logfreedom minus a constant -- _not_ the discrete derivative of logfreedom; however, logfreedom_delta_delta is indeed the discrete derivative of logfreedom (and logfreedom_delta, because they only differ by said constant). Anyway, we now need to derive logfreedom_delta_delta:
 
 logfreedom_delta_delta=
-+logfreedom(pop_down_left+pop_delta+1, pop_down_right-pop_delta-1, pop_up_left-pop_delta-1, pop_up_right+pop_delta+1)
--logfreedom(pop_down_left+pop_delta, pop_down_right-pop_delta, pop_up_left-pop_delta, pop_up_right+pop_delta)
++logfreedom_delta(pop_down_left+pop_delta+1, pop_down_right-pop_delta-1, pop_up_left-pop_delta-1, pop_up_right+pop_delta+1)
+-logfreedom_delta(pop_down_left+pop_delta, pop_down_right-pop_delta, pop_up_left-pop_delta, pop_up_right+pop_delta)
 
 logfreedom_delta_delta=
 +(pop_delta+1)*(LOG(freq_down_right)-LOG(freq_up_left+1))
@@ -1173,13 +1230,64 @@ logfreedom_delta_delta=
 -LOG_SUM(pop_up_right)+LOG_SUM(pop_up_right+pop_delta)
 
 logfreedom_delta_delta=
++(LOG(freq_down_right)-LOG(freq_up_left+1))
+-LOG_SUM(pop_down_left+pop_delta+1)
++LOG_SUM(pop_down_left+pop_delta)
+-LOG_SUM(pop_down_right-pop_delta-1)
++LOG_SUM(pop_down_right-pop_delta)
+-LOG_SUM(pop_up_left-pop_delta-1)
++LOG_SUM(pop_up_left-pop_delta)
+-LOG_SUM(pop_up_right+pop_delta+1)
++LOG_SUM(pop_up_right+pop_delta)
+
+logfreedom_delta_delta=
 +LOG(freq_down_right)-LOG(freq_up_left+1)
 -LOG(pop_down_left+pop_delta+1)
 +LOG(pop_down_right-pop_delta)
 +LOG(pop_up_left-pop_delta)
 -LOG(pop_up_right+pop_delta+1)
 
-Now, this is all complicated by the possibility that we have (pop_idx_down==pop_idx_up) or (pop_idx_down=(pop_idx_up+2)), in which case ((pop_down_right==pop_up_left) and (freq_down_right==freq_up_left)) or ((pop_down_left==pop_up_right) and (freq_up_left==(freq_down_right-2))), respectively. In the case of (pop_idx_down==pop_idx_up), going back to the logfreedom formula and progressing in a similar manner produces:
+Now, this is all complicated by the possibility that we have (pop_idx_down==pop_idx_up) or (pop_idx_down=(pop_idx_up+2)).
+
+In the case of (pop_idx_down==pop_idx_up), we have (freq_up_left==freq_down_right) and (pop_up_left==pop_down_right), so:
+
+logfreedom_delta=
++logfreedom(pop_down_left+pop_delta, pop_down_right-(pop_delta<<1), pop_up_right+pop_delta)
+-logfreedom(pop_down_left, pop_down_right, pop_up_right)
+
+logfreedom_delta=
+-LOG_SUM(pop_down_left+pop_delta)
+-LOG_SUM(pop_down_right-(pop_delta<<1))
+-LOG_SUM(pop_up_right+pop_delta)
+-(pop_down_left+pop_delta)*LOG_SUM(freq_down_right-1)
+-(pop_down_right-(pop_delta<<1))*LOG_SUM(freq_down_right)
+-(pop_up_right+pop_delta)*LOG_SUM(freq_down_right+1)
++LOG_SUM(pop_down_left)
++LOG_SUM(pop_down_right)
++LOG_SUM(pop_up_right)
++pop_down_left*LOG_SUM(freq_down_right-1)
++pop_down_right*LOG_SUM(freq_down_right)
++pop_up_right*LOG_SUM(freq_down_right+1)
+
+logfreedom_delta=
++LOG_SUM(pop_down_left)
+-LOG_SUM(pop_down_left+pop_delta)
++LOG_SUM(pop_down_right)
+-LOG_SUM(pop_down_right-(pop_delta<<1))
++LOG_SUM(pop_up_right)
+-LOG_SUM(pop_up_right+pop_delta)
+-(pop_down_left+pop_delta)*LOG_SUM(freq_down_right-1)
++pop_down_left*LOG_SUM(freq_down_right-1)
+-(pop_down_right-(pop_delta<<1))*LOG_SUM(freq_down_right)
++pop_down_right*LOG_SUM(freq_down_right)
+-(pop_up_right+pop_delta)*LOG_SUM(freq_down_right+1)
++pop_up_right*LOG_SUM(freq_down_right+1)
+
+logfreedom_delta=
++pop_delta*(2*LOG_SUM(freq_down_right)-LOG_SUM(freq_down_right-1)-LOG_SUM(freq_down_right+1))
++LOG_SUM(pop_down_left)-LOG_SUM(pop_down_left+pop_delta)
++LOG_SUM(pop_down_right)-LOG_SUM(pop_down_right-(pop_delta<<1))
++LOG_SUM(pop_up_right)-LOG_SUM(pop_up_right+pop_delta)
 
 logfreedom_delta=
 +pop_delta*(LOG(freq_down_right)-LOG(freq_down_right+1))
@@ -1187,7 +1295,28 @@ logfreedom_delta=
 +LOG_SUM(pop_down_right)-LOG_SUM(pop_down_right-(pop_delta<<1))
 +LOG_SUM(pop_up_right)-LOG_SUM(pop_up_right+pop_delta)
 
-and
+logfreedom_delta_delta=
++logfreedom_delta(pop_down_left+pop_delta+1, pop_down_right-(pop_delta<<1)-2, pop_up_right+pop_delta+1)
+-logfreedom_delta(pop_down_left+pop_delta, pop_down_right-(pop_delta<<1), pop_up_right+pop_delta)
+
+logfreedom_delta_delta=
++(pop_delta+1)*(LOG(freq_down_right)-LOG(freq_down_right+1))
++LOG_SUM(pop_down_left)-LOG_SUM(pop_down_left+pop_delta+1)
++LOG_SUM(pop_down_right)-LOG_SUM(pop_down_right-(pop_delta<<1)-2)
++LOG_SUM(pop_up_right)-LOG_SUM(pop_up_right+pop_delta+1)
+-pop_delta*(LOG(freq_down_right)-LOG(freq_down_right+1))
+-LOG_SUM(pop_down_left)+LOG_SUM(pop_down_left+pop_delta)
+-LOG_SUM(pop_down_right)+LOG_SUM(pop_down_right-(pop_delta<<1))
+-LOG_SUM(pop_up_right)+LOG_SUM(pop_up_right+pop_delta)
+
+logfreedom_delta_delta=
++(LOG(freq_down_right)-LOG(freq_down_right+1))
+-LOG_SUM(pop_down_left+pop_delta+1)
++LOG_SUM(pop_down_left+pop_delta)
+-LOG_SUM(pop_down_right-(pop_delta<<1)-2)
++LOG_SUM(pop_down_right-(pop_delta<<1))
+-LOG_SUM(pop_up_right+pop_delta+1)
++LOG_SUM(pop_up_right+pop_delta)
 
 logfreedom_delta_delta=
 +LOG(freq_down_right)-LOG(freq_down_right+1)
@@ -1196,13 +1325,74 @@ logfreedom_delta_delta=
 +LOG(pop_down_right-(pop_delta<<1))
 -LOG(pop_up_right+pop_delta+1)
 
-Or in the case of (pop_idx_down=(pop_idx_up+2)):
+and in the case of (pop_idx_down=(pop_idx_up+2)), we have (freq_up_left==(freq_down_right-2)) and (pop_up_right==pop_down_left), so:
+
+logfreedom_delta=
++logfreedom(pop_down_left+(pop_delta<<1), pop_down_right-pop_delta, pop_up_left-pop_delta)
+-logfreedom(pop_down_left, pop_down_right, pop_up_left)
+
+logfreedom_delta=
+-LOG_SUM(pop_down_left+(pop_delta<<1))
+-LOG_SUM(pop_down_right-pop_delta)
+-LOG_SUM(pop_up_left-pop_delta)
+-(pop_down_left+(pop_delta<<1))*LOG_SUM(freq_down_right-1)
+-(pop_down_right-pop_delta)*LOG_SUM(freq_down_right)
+-(pop_up_left-pop_delta)*LOG_SUM(freq_down_right-2)
++LOG_SUM(pop_down_left)
++LOG_SUM(pop_down_right)
++LOG_SUM(pop_up_left)
++pop_down_left*LOG_SUM(freq_down_right-1)
++pop_down_right*LOG_SUM(freq_down_right)
++pop_up_left*LOG_SUM(freq_down_right-2)
+
+logfreedom_delta=
++LOG_SUM(pop_down_left)
+-LOG_SUM(pop_down_left+(pop_delta<<1))
++LOG_SUM(pop_down_right)
+-LOG_SUM(pop_down_right-pop_delta)
++LOG_SUM(pop_up_left)
+-LOG_SUM(pop_up_left-pop_delta)
+-(pop_down_left+(pop_delta<<1))*LOG_SUM(freq_down_right-1)
++pop_down_left*LOG_SUM(freq_down_right-1)
+-(pop_down_right-pop_delta)*LOG_SUM(freq_down_right)
++pop_down_right*LOG_SUM(freq_down_right)
+-(pop_up_left-pop_delta)*LOG_SUM(freq_down_right-2)
++pop_up_left*LOG_SUM(freq_down_right-2)
+
+logfreedom_delta=
++pop_delta*(LOG_SUM(freq_down_right-2)-2*LOG_SUM(freq_down_right-1)+LOG_SUM(freq_down_right))
++LOG_SUM(pop_down_left)-LOG_SUM(pop_down_left+(pop_delta<<1))
++LOG_SUM(pop_down_right)-LOG_SUM(pop_down_right-pop_delta)
++LOG_SUM(pop_up_left)-LOG_SUM(pop_up_left-pop_delta)
 
 logfreedom_delta=
 +pop_delta*(LOG(freq_down_right)-LOG(freq_down_right-1))
 +LOG_SUM(pop_down_left)-LOG_SUM(pop_down_left+(pop_delta<<1))
 +LOG_SUM(pop_down_right)-LOG_SUM(pop_down_right-pop_delta)
 +LOG_SUM(pop_up_left)-LOG_SUM(pop_up_left-pop_delta)
+
+logfreedom_delta_delta=
++logfreedom(pop_down_left+(pop_delta<<1)+2, pop_down_right-pop_delta-1, pop_up_left-pop_delta-1)
+-logfreedom(pop_down_left+(pop_delta<<1), pop_down_right-pop_delta, pop_up_left-pop_delta)
+
+logfreedom_delta_delta=
++(pop_delta+1)*(LOG(freq_down_right)-LOG(freq_down_right-1))
++LOG_SUM(pop_down_left)-LOG_SUM(pop_down_left+(pop_delta<<1)+2)
++LOG_SUM(pop_down_right)-LOG_SUM(pop_down_right-pop_delta-1)
++LOG_SUM(pop_up_left)-LOG_SUM(pop_up_left-pop_delta-1)
+-pop_delta*(LOG(freq_down_right)-LOG(freq_down_right-1))
+-LOG_SUM(pop_down_left)+LOG_SUM(pop_down_left+(pop_delta<<1))
+-LOG_SUM(pop_down_right)+LOG_SUM(pop_down_right-pop_delta)
+-LOG_SUM(pop_up_left)+LOG_SUM(pop_up_left-pop_delta)
+
+logfreedom_delta_delta=
++(LOG(freq_down_right)-LOG(freq_down_right-1))
+-LOG_SUM(pop_down_left+(pop_delta<<1)+2)
++LOG_SUM(pop_down_left+(pop_delta<<1))
+-LOG_SUM(pop_down_right-pop_delta-1)
++LOG_SUM(pop_down_right-pop_delta)
+-LOG_SUM(pop_up_left-pop_delta-1)
++LOG_SUM(pop_up_left-pop_delta)
 
 logfreedom_delta_delta=
 +LOG(freq_down_right)-LOG(freq_down_right-1)
